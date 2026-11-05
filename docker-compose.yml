@@ -1,0 +1,28 @@
+# Local dependencies for later phases. The API itself runs from the venv for now.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: websearch
+      POSTGRES_PASSWORD: websearch
+      POSTGRES_DB: websearch
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  # Free search provider: self-hosted SearXNG (no API key, no per-query fee).
+  searxng:
+    image: searxng/searxng:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/searxng:/etc/searxng:rw
+
+volumes:
+  pgdata:

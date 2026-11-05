@@ -1,0 +1,15 @@
+# SearXNG overrides. Everything else comes from SearXNG's defaults.
+use_default_settings: true
+
+server:
+  # Replace before any shared deployment. Generate with: openssl rand -hex 32
+  secret_key: "replace-me-locally"
+  # The API is called only by our service, so the bot limiter is off.
+  limiter: false
+  image_proxy: false
+
+search:
+  # The provider adapter needs JSON output.
+  formats:
+    - html
+    - json

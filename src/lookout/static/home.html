@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lookout</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/static/ui.css">
+  <link rel="stylesheet" href="/static/home.css">
+  <script src="/static/theme.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="lookout home">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><polygon points="11,2 21,20 1,20"></polygon></svg>
+      <span>lookout</span>
+    </a>
+    <span class="slash" aria-hidden="true">/</span>
+    <nav class="tabs" aria-label="Pages">
+      <a href="/playground">Playground</a>
+      <a href="/admin">Admin</a>
+      <a href="/docs">API reference</a>
+    </nav>
+    <div class="topbar-end">
+      <button type="button" class="icon-button" id="theme-toggle" aria-label="Switch to light theme">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="home">
+    <section class="hero">
+      <h1>Web search that answers an agent's question, not a person's.</h1>
+      <p class="lede">One call returns ranked pages with the passages that matter for the agent's objective, inside a character budget you set. Usage is metered per key, so every caller has a monthly limit.</p>
+      <div class="hero-actions">
+        <a class="button-primary" href="/playground">Open the playground</a>
+        <a class="button" href="/docs">API reference</a>
+      </div>
+    </section>
+
+    <section class="demo" aria-label="Example request and response">
+      <figure class="card code">
+        <figcaption><span>Request</span><span class="mono">POST /v1/search</span></figcaption>
+        <pre>curl -s localhost:8765/v1/search \
+  -H "Authorization: Bearer $KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "FDA predetermined change control plan",
+    "objective": "What can manufacturers change without a new submission?",
+    "mode": "deep",
+    "max_results": 4,
+    "max_chars_per_result": 800
+  }'</pre>
+      </figure>
+      <figure class="card code">
+        <figcaption><span>Response</span><span class="mono">200, trimmed to one result</span></figcaption>
+        <pre>{
+  "request_id": "req_9f3c1a7e2b4d6081",
+  "query": "FDA predetermined change control plan",
+  "results": [
+    {
+      "title": "Predetermined Change Control Plans for AI-Enabled Device Software Functions",
+      "url": "https://www.fda.gov/media/166704/download",
+      "domain": "fda.gov",
+      "published_at": "2024-12-04",
+      "score": 0.91,
+      "excerpts": [
+        "A PCCP describes the modifications a manufacturer intends to make to the device, and how those modifications will be assessed, so that they can be implemented without a new marketing submission."
+      ],
+      "fetched_at": "2026-11-04T09:12:41Z",
+      "fetch_status": "ok"
+    }
+  ],
+  "usage": { "credits": 2 },
+  "latency_ms": 3120,
+  "cached": false
+}</pre>
+      </figure>
+    </section>
+
+    <section class="modes" aria-label="Modes">
+      <div class="card mode">
+        <div class="mode-head">
+          <h2>Fast</h2>
+          <span class="mode-cost mono">1 credit</span>
+        </div>
+        <p>Titles, links and search snippets from the search engine. About a second. Use it to find pages or to answer questions a snippet can settle.</p>
+      </div>
+      <div class="card mode">
+        <div class="mode-head">
+          <h2>Deep</h2>
+          <span class="mode-cost mono">2 credits</span>
+        </div>
+        <p>Reads each page and returns the passages that best match the query and objective. Three to four seconds cold, near zero once the pages are cached. Pages that are not ready in time fall back to their snippet and finish loading in the background.</p>
+      </div>
+    </section>
+
+    <section class="steps" aria-labelledby="steps-title">
+      <h2 id="steps-title">Get started</h2>
+      <ol>
+        <li>
+          <h3>Create a key</h3>
+          <p>On the server, once. The key is printed a single time; only a hash is stored.</p>
+          <pre>lookout create-key --name my-agent</pre>
+        </li>
+        <li>
+          <h3>Call the API</h3>
+          <p>Send the key as a bearer token. Start with fast mode and add an objective when you switch to deep.</p>
+          <pre>Authorization: Bearer lo_…</pre>
+        </li>
+        <li>
+          <h3>Watch usage</h3>
+          <p>Each key has a monthly credit limit. The <a href="/admin">admin page</a> shows credits per day, cache share and every key against its limit.</p>
+        </li>
+      </ol>
+    </section>
+
+    <footer class="home-foot">
+      <a href="/openapi.json">openapi.json</a>
+      <a href="/docs">API reference</a>
+      <a href="/healthz">healthz</a>
+    </footer>
+  </main>
+</body>
+</html>

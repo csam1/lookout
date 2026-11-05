@@ -1,0 +1,6 @@
+# Environment files may hold secrets. Claude must not read or edit them.
+# Enforced by permissions.deny in .claude/settings.json.
+.env
+.env.*
+**/.env
+**/.env.*

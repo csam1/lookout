@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lookout admin</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/static/ui.css">
+  <link rel="stylesheet" href="/static/admin.css">
+  <script src="/static/theme.js"></script>
+  <script src="/static/admin.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="lookout home">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><polygon points="11,2 21,20 1,20"></polygon></svg>
+      <span>lookout</span>
+    </a>
+    <span class="slash" aria-hidden="true">/</span>
+    <nav class="tabs" aria-label="Pages">
+      <a href="/playground">Playground</a>
+      <a href="/admin" aria-current="page">Admin</a>
+    </nav>
+    <div class="topbar-end">
+      <form id="key-form" novalidate>
+        <div class="pill" id="key-pill" hidden>
+          <span class="dot" aria-hidden="true"></span>
+          <span>Admin</span>
+          <span class="mono" id="key-prefix"></span>
+          <button type="button" class="link" id="sign-out">Sign out</button>
+        </div>
+        <div class="key-entry" id="key-entry">
+          <label for="admin-key" class="visually-hidden">Admin API key</label>
+          <input id="admin-key" type="password" autocomplete="off" spellcheck="false" placeholder="Admin API key">
+          <button type="submit" id="load" class="button">Sign in</button>
+        </div>
+      </form>
+      <button type="button" class="icon-button" id="theme-toggle" aria-label="Switch to light theme">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="admin">
+    <section class="error" id="error" role="alert" hidden></section>
+
+    <section class="gate" id="gate">
+      <h2>Sign in with an admin key</h2>
+      <p>Admin keys can create and revoke keys and see usage for every caller. Create the first one on the server:</p>
+      <pre>lookout create-key --name your-name --admin</pre>
+      <p class="hint">The key is kept in this browser tab only.</p>
+    </section>
+
+    <div id="content" hidden>
+      <div class="page-head">
+        <div>
+          <h1>Usage</h1>
+          <p class="hint" id="period"></p>
+        </div>
+        <div class="segmented periods" role="radiogroup" aria-label="Chart period">
+          <label><input type="radio" name="days" value="7">7 days</label>
+          <label><input type="radio" name="days" value="30" checked>30 days</label>
+          <label><input type="radio" name="days" value="90">90 days</label>
+        </div>
+      </div>
+
+      <dl class="tiles" id="facts"></dl>
+
+      <figure class="card chart">
+        <div class="chart-head">
+          <figcaption id="chart-title">Credits per day</figcaption>
+          <div class="chart-tools">
+            <span class="legend"><span class="swatch deep" aria-hidden="true"></span>Deep</span>
+            <span class="legend"><span class="swatch fast" aria-hidden="true"></span>Fast</span>
+            <button type="button" class="button" id="toggle-table" aria-expanded="false" aria-controls="daily-table">Table</button>
+          </div>
+        </div>
+        <div class="chart-frame" id="chart" role="img" aria-labelledby="chart-title chart-summary"></div>
+        <p class="visually-hidden" id="chart-summary"></p>
+        <div class="tooltip" id="tooltip" role="status" hidden></div>
+        <div class="chart-table" id="daily-table" hidden>
+          <table>
+            <thead><tr><th scope="col">Date</th><th scope="col" class="num">Calls</th><th scope="col" class="num">Deep credits</th><th scope="col" class="num">Credits</th></tr></thead>
+            <tbody id="daily-rows"></tbody>
+          </table>
+        </div>
+      </figure>
+
+      <section class="keys-section" aria-labelledby="keys-title">
+        <div class="section-head">
+          <h2 id="keys-title">API keys</h2>
+          <div class="section-tools">
+            <div class="filter">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+              <label for="key-filter" class="visually-hidden">Filter keys</label>
+              <input id="key-filter" type="text" autocomplete="off" placeholder="Filter keys…">
+            </div>
+            <button type="button" id="show-create" class="button-primary">Create key</button>
+          </div>
+        </div>
+
+        <div class="card created" id="created" role="status" hidden>
+          <p><strong>Copy this key now.</strong> It is shown once and can't be recovered. If it is lost, revoke it and create a new one.</p>
+          <div class="created-row">
+            <code id="created-key"></code>
+            <button type="button" id="copy-created" class="button">Copy key</button>
+          </div>
+          <button type="button" id="dismiss-created" class="link">I've stored it</button>
+        </div>
+
+        <form id="create-form" class="card create" hidden novalidate>
+          <div class="field">
+            <label for="new-name">Name</label>
+            <input id="new-name" type="text" maxlength="100" autocomplete="off" placeholder="billing-agent">
+            <p class="hint">Who or what will use it. Shown in usage reports.</p>
+          </div>
+          <div class="field">
+            <label for="new-limit">Monthly credit limit</label>
+            <input id="new-limit" type="number" min="1" step="1" value="10000">
+            <p class="hint">Fast searches cost 1 credit, deep searches 2.</p>
+          </div>
+          <label class="switch">
+            <span>Admin key (can manage other keys)</span>
+            <span class="track" aria-hidden="true"></span>
+            <input id="new-admin" type="checkbox">
+          </label>
+          <div class="actions">
+            <button type="submit" class="button-primary">Create key</button>
+            <button type="button" id="cancel-create" class="button">Cancel</button>
+          </div>
+        </form>
+
+        <div class="card table-wrap">
+          <table class="keys">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Key</th>
+                <th scope="col">Credits this month</th>
+                <th scope="col" class="num">Calls</th>
+                <th scope="col">Last used</th>
+                <th scope="col">Created</th>
+                <th scope="col"><span class="visually-hidden">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody id="key-rows"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

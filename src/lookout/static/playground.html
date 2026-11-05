@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lookout playground</title>
+  <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="/static/ui.css">
+  <script src="/static/theme.js"></script>
+  <script src="/static/playground.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="lookout home">
+      <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><polygon points="11,2 21,20 1,20"></polygon></svg>
+      <span>lookout</span>
+    </a>
+    <span class="slash" aria-hidden="true">/</span>
+    <nav class="tabs" aria-label="Pages">
+      <a href="/playground" aria-current="page">Playground</a>
+      <a href="/admin">Admin</a>
+    </nav>
+    <div class="topbar-end">
+      <div class="pill usage" id="usage" hidden>
+        <span class="mono" id="usage-used"></span>
+        <span id="usage-of"></span>
+        <span class="pill-bar" aria-hidden="true"><span id="usage-fill"></span></span>
+      </div>
+      <form id="key-form" novalidate>
+        <div class="pill" id="key-pill" hidden>
+          <span class="dot" aria-hidden="true"></span>
+          <span class="mono" id="key-prefix"></span>
+          <button type="button" class="link" id="change-key">Change</button>
+        </div>
+        <div class="key-entry" id="key-entry">
+          <label for="api-key" class="visually-hidden">API key</label>
+          <input id="api-key" type="password" autocomplete="off" spellcheck="false" placeholder="Paste an API key">
+          <button type="submit" class="button">Use key</button>
+        </div>
+      </form>
+      <button type="button" class="icon-button" id="theme-toggle" aria-label="Switch to light theme">
+        <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+        <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="shell">
+    <aside class="panel">
+      <form id="search-form" novalidate>
+        <div class="field">
+          <label for="query">Query</label>
+          <input id="query" type="text" maxlength="500" autocomplete="off" placeholder="FDA guidance on AI medical devices">
+        </div>
+
+        <div class="field">
+          <label for="objective"><span>Objective</span><span class="optional">optional</span></label>
+          <textarea id="objective" rows="3" maxlength="1000" placeholder="What is the agent trying to find out?"></textarea>
+          <p class="hint">Deep mode picks the passages that answer this.</p>
+        </div>
+
+        <div class="field">
+          <span class="field-label" id="mode-label">Mode</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="mode-label">
+            <label>
+              <input type="radio" name="mode" value="fast" checked>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg>
+              Fast
+            </label>
+            <label>
+              <input type="radio" name="mode" value="deep">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              Deep
+            </label>
+          </div>
+          <p class="hint" id="mode-note">Search snippets only. About 1 second, 1 credit.</p>
+        </div>
+
+        <details class="options" open>
+          <summary>
+            <span>Options</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg>
+          </summary>
+          <div class="options-body">
+          <div class="options-grid">
+            <div class="field">
+              <label for="max-results">Results</label>
+              <input id="max-results" type="number" min="1" max="20" value="5">
+            </div>
+            <div class="field">
+              <label for="max-chars">Chars per result</label>
+              <input id="max-chars" type="number" min="100" max="10000" step="100" value="1000">
+            </div>
+          </div>
+          <div class="field">
+            <label for="time-range">Published within</label>
+            <select id="time-range">
+              <option value="any">Any time</option>
+              <option value="day">Past day</option>
+              <option value="week">Past week</option>
+              <option value="month">Past month</option>
+              <option value="year">Past year</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="include-domains">Only these sites</label>
+            <div class="chips" id="include-chips">
+              <input id="include-domains" type="text" autocomplete="off" placeholder="fda.gov">
+            </div>
+          </div>
+          <div class="field">
+            <label for="exclude-domains">Skip these sites</label>
+            <div class="chips" id="exclude-chips">
+              <input id="exclude-domains" type="text" autocomplete="off" placeholder="pinterest.com">
+            </div>
+          </div>
+          <label class="switch">
+            <span>Also return page text</span>
+            <span class="track" aria-hidden="true"></span>
+            <input id="raw-content" type="checkbox">
+          </label>
+          </div>
+        </details>
+
+        <div class="submit-row">
+          <button type="submit" id="submit" class="button-primary">
+            <span id="submit-text">Search</span>
+            <kbd class="keys" aria-hidden="true"><span>⌘</span><span>⏎</span></kbd>
+          </button>
+        </div>
+      </form>
+    </aside>
+
+    <main class="results" id="results">
+      <section class="error" id="error" role="alert" hidden></section>
+
+      <section class="empty" id="empty">
+        <h2>Run a search</h2>
+        <p>You will see exactly what an agent receives: ranked results, the passages chosen for the objective, and the cost. Try one of these:</p>
+        <ul class="examples">
+          <li><button type="button" class="example" data-query="FDA predetermined change control plan AI devices" data-objective="What can manufacturers change without a new submission?" data-mode="deep"><span>What can AI device makers change without a new FDA submission?</span><span class="badge plain">Deep</span></button></li>
+          <li><button type="button" class="example" data-query="Redis eviction policies" data-objective="Which policy should a cache use when memory is full?" data-mode="deep"><span>Which Redis eviction policy suits a cache?</span><span class="badge plain">Deep</span></button></li>
+          <li><button type="button" class="example" data-query="HbA1c targets elderly patients guidelines" data-objective="" data-mode="fast"><span>HbA1c targets for elderly patients</span><span class="badge plain">Fast</span></button></li>
+        </ul>
+      </section>
+
+      <div class="stats" id="summary" aria-live="polite" hidden></div>
+
+      <div class="results-head" id="results-head" hidden>
+        <h2>Results for <span id="results-query"></span></h2>
+        <span class="request-id" id="request-id"></span>
+      </div>
+
+      <ol class="result-list" id="result-list"></ol>
+
+      <section class="card" id="request" hidden>
+        <div class="request-head">
+          <button type="button" class="request-toggle" id="request-toggle" aria-expanded="false" aria-controls="request-body">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg>
+            Request and raw response
+          </button>
+          <div class="request-actions">
+            <button type="button" id="copy-curl" class="button">Copy as curl</button>
+            <button type="button" id="copy-json" class="button">Copy JSON</button>
+          </div>
+        </div>
+        <div class="request-body" id="request-body" hidden>
+          <h3>Request</h3>
+          <pre id="curl"></pre>
+          <h3>Response</h3>
+          <pre id="raw"></pre>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
